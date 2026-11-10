@@ -1,4 +1,4 @@
-package com.cinnamoroll.ovo
+package com.hxposed.ovo
 
 import org.junit.Test
 

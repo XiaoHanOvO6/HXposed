@@ -1,4 +1,4 @@
-package com.cinnamoroll.ovo
+package com.hxposed.ovo
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

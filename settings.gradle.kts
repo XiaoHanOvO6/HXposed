@@ -28,5 +28,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Cinnamoroll"
+rootProject.name = "HXposed"
 include(":app")

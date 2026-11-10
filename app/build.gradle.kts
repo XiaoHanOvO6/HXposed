@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.cinnamoroll.ovo"
+    namespace = "com.hxposed.ovo"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.cinnamoroll.ovo"
+        applicationId = "com.hxposed.ovo"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
