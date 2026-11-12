@@ -13,14 +13,14 @@ e = 单条消息, b = 合并组首条, c = 合并组中间, d = 合并组末条
 */
 object ChatAvatarHook {
 
-    private const val MERGE_CLASS = "com.tencent.mobileqq.aio.msg.ab"
-    private const val MERGE_INFO_CLASS = "com.tencent.mobileqq.aio.msg.p"
+    private const val MSG_MERGE_CLASS = "com.tencent.mobileqq.aio.msg.ab"
+    private const val MSG_MERGE_INFO_CLASS = "com.tencent.mobileqq.aio.msg.p"
 
     fun install(classLoader: ClassLoader) {
-        val mergeClass = runCatching { XposedHelpers.findClass(MERGE_CLASS, classLoader) }.getOrNull()
-        if (mergeClass == null) return log("未找到 $MERGE_CLASS，TIM 版本不匹配，跳过")
-        val infoClass = runCatching { XposedHelpers.findClass(MERGE_INFO_CLASS, classLoader) }.getOrNull()
-        if (infoClass == null) return log("未找到 $MERGE_INFO_CLASS，TIM 版本不匹配，跳过")
+        val mergeClass = runCatching { XposedHelpers.findClass(MSG_MERGE_CLASS, classLoader) }.getOrNull()
+        if (mergeClass == null) return log("未找到 $MSG_MERGE_CLASS，TIM 版本不匹配，跳过")
+        val infoClass = runCatching { XposedHelpers.findClass(MSG_MERGE_INFO_CLASS, classLoader) }.getOrNull()
+        if (infoClass == null) return log("未找到 $MSG_MERGE_INFO_CLASS，TIM 版本不匹配，跳过")
 
         mapOf("e" to true, "b" to false, "c" to false, "d" to false).forEach { (method, value) ->
             runCatching {
@@ -32,8 +32,8 @@ object ChatAvatarHook {
                         override fun replaceHookedMethod(param: MethodHookParam?): Any? = value
                     }
                 )
-                log("已 hook $MERGE_CLASS#$method -> $value")
-            }.onFailure { log("hook $MERGE_CLASS#$method 失败: $it") }
+                log("已 hook $MSG_MERGE_CLASS#$method -> $value")
+            }.onFailure { log("hook $MSG_MERGE_CLASS#$method 失败: $it") }
         }
     }
     private fun log(message: String) = XposedBridge.log("[HXposed] $message")
