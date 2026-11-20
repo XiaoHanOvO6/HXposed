@@ -8,5 +8,6 @@ class MainHook : IXposedHookLoadPackage {
         if (lpparam.packageName != "com.tencent.tim") return
 
         ChatAvatarHook.install(lpparam.classLoader)
+        SettingEntryHook.install(lpparam.classLoader)
     }
 }
