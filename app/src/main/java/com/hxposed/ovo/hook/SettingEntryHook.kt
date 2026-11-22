@@ -8,19 +8,17 @@ import de.robv.android.xposed.XposedHelpers
 import java.lang.reflect.Proxy
 
 /**
- * 在 TIM 设置页「账号安全」下方插入 HXposed 入口（TIM 4.1.0 / 4050）。
- *
+ * 在 TIM 设置页最顶部插入一个独立的分组
  * 设置页条目由 MainSettingConfigProvider#d(Context) 统一组装：
  * 返回 List<c>，每个 c 是一组，c.b() 是组内条目 List<d>。
- * 第一组依次为 账号信息 / 手机号 / 账号安全（AccountSecurityItemProcessor），
- * 向该组追加一个 process.h 即可得到标准单行条目。
+ * 新建一个只含 process.h 的 c 并插到列表首位，即可得到顶部单行卡片。
+ * 后续 SettingConfigProvider#i 会自动绑定条目并分发生命周期，无需额外处理。
  */
 object SettingEntryHook {
 
     private const val PROVIDER_CLASS = "com.tencent.mobileqq.setting.main.MainSettingConfigProvider"
     private const val ITEM_CLASS = "com.tencent.mobileqq.setting.processor.h"
-    private const val ACCOUNT_SECURITY_CLASS =
-        "com.tencent.mobileqq.setting.main.processor.AccountSecurityItemProcessor"
+    private const val GROUP_CLASS = "com.tencent.mobileqq.setting.processor.c"
     private const val R_DRAWABLE_CLASS = "com.tencent.mobileqq.R\$drawable"
     private const val ICON_NAME = "qui_tuning"
 
@@ -52,21 +50,22 @@ object SettingEntryHook {
     private fun inject(param: XC_MethodHook.MethodHookParam, itemClass: Class<*>, classLoader: ClassLoader) {
         val context = param.args.getOrNull(0) as? Context ?: return
         val groups = param.result as? MutableList<Any> ?: return
-        if (groups.isEmpty()) return
-
-        val group = groups.firstOrNull { group ->
-            itemsOf(group)?.any { it.javaClass.name == ACCOUNT_SECURITY_CLASS } == true
-        } ?: groups.first()
-
-        val items = itemsOf(group) ?: return
-        if (items.any { itemIdOf(it) == ITEM_ID }) return
+        if (groups.any { group -> itemsOf(group)?.any { item -> itemIdOf(item) == ITEM_ID } == true }) return
 
         val item = XposedHelpers.newInstance(itemClass, context, ITEM_ID, TITLE, drawableId(context))
         setClickAction(itemClass, item, context, classLoader)
 
-        val index = items.indexOfFirst { it.javaClass.name == ACCOUNT_SECURITY_CLASS }
-        items.add(if (index >= 0) index + 1 else items.size, item)
-        log("已在设置页插入 $TITLE")
+        val groupClass = XposedHelpers.findClass(GROUP_CLASS, classLoader)
+        val constructor = groupClass.getDeclaredConstructor(
+            List::class.java,
+            CharSequence::class.java,
+            CharSequence::class.java
+        ).apply { isAccessible = true }
+        // 宿主默认参数为 ""，传 null 会触发 Kotlin 非空校验抛 NPE
+        val hxposedGroup = constructor.newInstance(arrayListOf(item), "", "")
+
+        groups.add(0, hxposedGroup)
+        log("已在设置页顶部插入 $TITLE")
     }
 
     /**
