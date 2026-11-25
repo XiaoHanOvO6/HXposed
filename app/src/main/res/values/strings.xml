@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">HXposed</string>
+    <string name="section_general">通用</string>
+    <string name="setting_theme">主题</string>
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
 </resources>
